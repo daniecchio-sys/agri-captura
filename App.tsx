@@ -819,7 +819,10 @@ export default function App() {
   // Stand: un material está completo si tiene nSubmuestras valores numéricos válidos (≥0)
   const standMaterialCompleto = (entry: { vals: string[] } | undefined) =>
     !!entry && entry.vals.length === nSubmuestras &&
-    entry.vals.every(v => v.trim() !== '' && !isNaN(Number(v)) && Number(v) >= 0)
+    entry.vals.every(v => {
+      const n = Number(v)
+      return v.trim() !== '' && !isNaN(n) && n >= 0 && n <= 100
+    })
 
   const standCompleto =
     standFranjaFinal !== '' &&
@@ -1265,34 +1268,14 @@ export default function App() {
           gap: '10px',
         }}>
           {/* Indicador de registros */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '15px' }}>💾</span>
-              <span style={{ fontSize: '13px', color: C.textoSec, fontWeight: 500 }}>
-                {registrosSesion.length === 0
-                  ? 'Sin registros guardados'
-                  : `${registrosSesion.length} registro${registrosSesion.length !== 1 ? 's' : ''} guardados localmente`
-                }
-              </span>
-            </div>
-            {registrosSesion.length > 0 && (
-              <button
-                onClick={borrarDatosLocales}
-                style={{
-                  background: 'none',
-                  border: `1px solid ${C.borde}`,
-                  borderRadius: '6px',
-                  padding: '5px 10px',
-                  fontSize: '12px',
-                  color: C.textoTer,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap' as const,
-                  fontWeight: 600,
-                }}
-              >
-                Borrar
-              </button>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '15px' }}>💾</span>
+            <span style={{ fontSize: '13px', color: C.textoSec, fontWeight: 500 }}>
+              {registrosSesion.length === 0
+                ? 'Sin registros guardados'
+                : `${registrosSesion.length} registro${registrosSesion.length !== 1 ? 's' : ''} guardados localmente`
+              }
+            </span>
           </div>
 
           {/* Botón exportar — visible solo con datos */}
@@ -1784,6 +1767,7 @@ export default function App() {
                         type="number"
                         inputMode="numeric"
                         min="0"
+                        max="100"
                         placeholder="—"
                         value={v}
                         onChange={e => setStandVal(mat, idx, e.target.value)}
@@ -1795,14 +1779,25 @@ export default function App() {
                           fontWeight: 700,
                           fontFamily: 'monospace',
                           padding: '0 8px',
-                          borderColor: v !== '' && !isNaN(Number(v)) ? C.verde : C.borde,
+                          borderColor: v !== '' && Number(v) > 100 ? '#EF4444'
+                            : v !== '' && !isNaN(Number(v)) ? C.verde : C.borde,
                           borderWidth: v !== '' ? '2px' : '1.5px',
-                          color: C.textoPrim,
+                          color: v !== '' && Number(v) > 100 ? '#EF4444' : C.textoPrim,
                         }}
                       />
                     </div>
                   ))}
                 </div>
+
+                {/* Error si algún recuento supera 100 */}
+                {entry.vals.some(v => v !== '' && Number(v) > 100) && (
+                  <p style={{
+                    margin: 0, fontSize: '12px', fontWeight: 700,
+                    color: '#EF4444', display: 'flex', alignItems: 'center', gap: '4px',
+                  }}>
+                    ⚠ El recuento no puede superar 100 plantas/m.
+                  </p>
+                )}
 
                 {/* Observación opcional */}
                 <input
