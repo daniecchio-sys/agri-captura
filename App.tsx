@@ -844,7 +844,7 @@ export default function App() {
     setPantalla('contexto')
     setCampania(''); setEnsayo(''); setSitioId('')
     setFecha(hoy())
-    setRegistrosSesion([])
+    // NO borrar registrosSesion — el histórico persiste entre visitas
   }
 
   const borrarDatosLocales = () => {
@@ -1601,7 +1601,7 @@ export default function App() {
 
         {registrosSesion.length > ultimaBatchFen.length && (
           <p style={{ textAlign: 'center', fontSize: '12px', color: C.textoTer, fontWeight: 600 }}>
-            {registrosSesion.length} registros totales en esta sesión
+            {registrosSesion.length} registros guardados localmente
           </p>
         )}
 
@@ -1931,7 +1931,7 @@ export default function App() {
 
           {registrosSesion.length > ultimaBatchStand.length && (
             <p style={{ textAlign: 'center', fontSize: '12px', color: C.textoTer, fontWeight: 600 }}>
-              {registrosSesion.length} registros totales en esta sesión
+              {registrosSesion.length} registros guardados localmente
             </p>
           )}
 
@@ -2168,7 +2168,7 @@ export default function App() {
 
         {registrosSesion.length > 1 && (
           <p style={{ textAlign: 'center', fontSize: '12px', color: C.textoTer, fontWeight: 600 }}>
-            {registrosSesion.length} registros totales en esta sesión
+            {registrosSesion.length} registros guardados localmente
           </p>
         )}
 
@@ -2703,7 +2703,7 @@ export default function App() {
 
         {registrosSesion.length > 1 && (
           <p style={{ textAlign: 'center', fontSize: '12px', color: C.textoTer, fontWeight: 600 }}>
-            {registrosSesion.length} registros totales en esta sesión
+            {registrosSesion.length} registros guardados localmente
           </p>
         )}
 
