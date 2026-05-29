@@ -794,6 +794,11 @@ export default function App() {
   const cPmgVals     = [cPmg1, cPmg2, cPmg3].filter((v): v is number => v !== null)
   const cPmgProm     = cPmgVals.length > 0 ? cPmgVals.reduce((a, b) => a + b, 0) / cPmgVals.length : null
 
+  // Peso 100 granos: si se cargó, debe estar entre 0.1 y 2 g. Bloquea guardado.
+  const peso100Invalido = [cPeso100_1, cPeso100_2, cPeso100_3].some(
+    p => p !== null && (p < 0.1 || p > 2)
+  )
+
   const cosechaCompleta =
     cosechaFranjaFinal !== '' && cosechaMaterial !== '' && cosechaFecha !== '' &&
     cLargo       !== null && cLargo       > 0 &&
@@ -2437,21 +2442,52 @@ export default function App() {
                 ['S1', cosechaPeso100_1, setCosechaPeso100_1, cPeso100_1],
                 ['S2', cosechaPeso100_2, setCosechaPeso100_2, cPeso100_2],
                 ['S3', cosechaPeso100_3, setCosechaPeso100_3, cPeso100_3],
-              ] as [string, string, (v: string) => void, number | null][]).map(([lbl, v, set, p]) => (
-                <div key={lbl} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={{ ...s.label, fontSize: '10px' }}>100 granos {lbl}</span>
-                  {numInput(v, set, '—', 'g', p)}
-                  {/* PMG calculado en vivo por muestra */}
-                  {p !== null && (
-                    <span style={{
-                      textAlign: 'center', fontSize: '11px', fontFamily: 'monospace',
-                      fontWeight: 700, color: C.naranja,
-                    }}>
-                      PMG {(p * 10).toFixed(1)} g
-                    </span>
-                  )}
-                </div>
-              ))}
+              ] as [string, string, (v: string) => void, number | null][]).map(([lbl, v, set, p]) => {
+                const fuera = p !== null && (p < 0.1 || p > 2)
+                return (
+                  <div key={lbl} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ ...s.label, fontSize: '10px' }}>100 granos {lbl}</span>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="text" inputMode="decimal" placeholder="—" value={v}
+                        onChange={e => { if (/^[\d]*[.,]?[\d]*$/.test(e.target.value) || e.target.value === '') set(e.target.value) }}
+                        style={{
+                          ...s.input, fontSize: '18px', fontWeight: 600, fontFamily: 'monospace',
+                          textAlign: 'right', paddingRight: '28px',
+                          borderColor: fuera ? '#EF4444' : p !== null ? C.verde : C.borde,
+                          borderWidth: v ? '2px' : '1.5px',
+                          color: fuera ? '#EF4444' : C.textoPrim,
+                        }}
+                      />
+                      <span style={{
+                        position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
+                        fontSize: '11px', fontWeight: 700, color: fuera ? '#EF4444' : C.textoTer,
+                        fontFamily: 'monospace', pointerEvents: 'none',
+                      }}>g</span>
+                    </div>
+                    {/* PMG calculado — solo si el valor es válido */}
+                    {p !== null && !fuera && (
+                      <span style={{
+                        textAlign: 'center', fontSize: '11px', fontFamily: 'monospace',
+                        fontWeight: 700, color: C.naranja,
+                      }}>
+                        PMG {(p * 10).toFixed(1)} g
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Mensaje de error si algún peso está fuera de rango */}
+            {peso100Invalido && (
+              <p style={{
+                margin: 0, fontSize: '12px', fontWeight: 700, color: '#EF4444',
+                display: 'flex', alignItems: 'center', gap: '4px',
+              }}>
+                ⚠ El peso de 100 granos debe estar entre 0,1 y 2 g.
+              </p>
+            )}
             </div>
 
             {/* PMG promedio final */}
@@ -2541,8 +2577,8 @@ export default function App() {
           )}
 
           <button
-            style={{ ...s.btn, ...(!cosechaCompleta || cosechaDuplicada || rendBloqueo ? s.btnDisabled : {}) }}
-            disabled={!cosechaCompleta || cosechaDuplicada || rendBloqueo}
+            style={{ ...s.btn, ...(!cosechaCompleta || cosechaDuplicada || rendBloqueo || peso100Invalido ? s.btnDisabled : {}) }}
+            disabled={!cosechaCompleta || cosechaDuplicada || rendBloqueo || peso100Invalido}
             onClick={guardarCosecha}
           >
             Guardar cosecha
