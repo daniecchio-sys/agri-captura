@@ -2488,7 +2488,6 @@ export default function App() {
                 ⚠ El peso de 100 granos debe estar entre 0,1 y 2 g.
               </p>
             )}
-            </div>
 
             {/* PMG promedio final */}
             {cPmgProm !== null && (
